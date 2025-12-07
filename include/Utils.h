@@ -1,6 +1,7 @@
 #ifndef VERIFICXX_UTILS_H
 #define VERIFICXX_UTILS_H
 
+#include <regex>
 #include <string>
 #include <vector>
 
@@ -17,6 +18,19 @@ public:
             pos += arg.size();
         }
         return result;
+    }
+
+    static std::string errorCharactersFormatter(const std::vector<char>& invalid_characters) {
+        std::string invalid_characters_string;
+        invalid_characters_string.reserve(invalid_characters.size() * 4);
+
+        for (const char c : invalid_characters) {
+            invalid_characters_string += "'";
+            invalid_characters_string += c;
+            invalid_characters_string += "' ";
+        }
+
+        return invalid_characters_string;
     }
 };
 

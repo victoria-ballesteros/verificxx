@@ -1,0 +1,8 @@
+//
+// Created by victoria on 12/7/25.
+//
+
+#ifndef VERIFICXX_COLUMNSCHEMAMODEL_H
+#define VERIFICXX_COLUMNSCHEMAMODEL_H
+
+#endif //VERIFICXX_COLUMNSCHEMAMODEL_H
