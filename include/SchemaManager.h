@@ -1,0 +1,8 @@
+//
+// Created by victoria on 12/7/25.
+//
+
+#ifndef VERIFICXX_SCHEMAMANAGER_H
+#define VERIFICXX_SCHEMAMANAGER_H
+
+#endif //VERIFICXX_SCHEMAMANAGER_H
