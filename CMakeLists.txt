@@ -14,7 +14,7 @@ add_library(verificxx_lib
         src/adapter/JsonUtils.cpp
         include/models/ColumnSchemaModel.h
         include/SchemaManager.h
-        include/adapter/JsonUtils.h
+        src/adapter/JsonUtils.h
         include/constants/ValidationsErrorMessages.h
         include/constants/ExecutionErrorMessages.h
 )
