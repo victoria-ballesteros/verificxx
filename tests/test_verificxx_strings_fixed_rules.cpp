@@ -7,8 +7,6 @@
 #include <gtest/gtest.h>
 
 #include "../include/Verificxx.h"
-#include "../include/StringFixedRules.h"
-
 
 TEST(VerificxxTests, EmptyStringShouldFailNumeric) {
     validation::Verificxx v("");

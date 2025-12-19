@@ -1,0 +1,20 @@
+{
+  "columns": [
+    {
+      "name": "email",
+      "allowsEmptyValues": false,
+      "rules": [
+        { "rule": "is_valid_email", "params": [] }
+      ]
+    },
+    {
+      "name": "age",
+      "allowsEmptyValues": true,
+      "rules": [
+        { "rule": "is_numeric", "params": [] },
+        { "rule": "min_value", "params": ["0"] },
+        { "rule": "max_value", "params": ["120"] }
+      ]
+    }
+  ]
+}

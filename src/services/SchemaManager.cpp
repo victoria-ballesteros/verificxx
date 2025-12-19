@@ -2,69 +2,56 @@
 // Created by victoria on 12/7/25.
 //
 
-#include "./"
-#include <fstream>
-#include <stdexcept>
+#include "../../include/SchemaManager.h"
+#include "../adapter/JsonUtils.h"
 #include <nlohmann/json.hpp>
+#include "../../include/Utils.h"
 
 using json = nlohmann::json;
 
-void SchemaManager::loadFromJson(const std::string& path) {
-    std::ifstream file(path);
-    if (!file.is_open()) {
-        throw std::runtime_error("No se pudo abrir el archivo JSON: " + path);
-    }
+inline std::string DUPLICATED_COLUMN_ERROR = "Column '{}' already exists in the schema.";
+inline std::string NONEXISTENT_COLUMN_ERROR = "Column '{}' was not found in the schema.";
 
-    json j;
-    try {
-        file >> j;
-    } catch (const std::exception& e) {
-        throw std::runtime_error(std::string("Error al parsear JSON: ") + e.what());
-    }
-
-    // Validar sección columns
-    if (!j.contains("columns") || !j["columns"].is_array()) {
-        throw std::runtime_error("JSON inválido: falta array 'columns'");
-    }
+void SchemaManager::loadFromJson(std::ifstream& file) {
+    json j = JsonUtils::parseFile(file);
+    JsonUtils::validateRootJson(j);
 
     schema.columns.clear();
-
-    for (const auto& colJson : j["columns"]) {
-        if (!colJson.contains("name") || !colJson["name"].is_string()) {
-            throw std::runtime_error("Columna sin nombre válido en JSON");
-        }
-
-        ColumnSchema col;
-        col.name = colJson["name"].get<std::string>();
-
-        // Procesar reglas
-        if (colJson.contains("rules")) {
-            if (!colJson["rules"].is_array()) {
-                throw std::runtime_error("Las reglas deben ser un array");
-            }
-
-            for (const auto& ruleJson : colJson["rules"]) {
-                if (!ruleJson.contains("rule") || !ruleJson["rule"].is_string()) {
-                    throw std::runtime_error("Regla sin 'rule' válido");
-                }
-
-                RuleDefinition rule;
-                rule.ruleName = ruleJson["rule"].get<std::string>();
-
-                // params es opcional
-                if (ruleJson.contains("params")) {
-                    if (!ruleJson["params"].is_array()) {
-                        throw std::runtime_error("'params' debe ser un array");
-                    }
-                    for (const auto& param : ruleJson["params"]) {
-                        rule.params.push_back(param.get<std::string>());
-                    }
-                }
-
-                col.rules.push_back(rule);
-            }
-        }
-
-        schema.columns.push_back(std::move(col));
+    for (const auto& colJson : j[JsonUtils::COLUMNS_PROPERTY_NAME]) {
+        schema.columns.push_back(JsonUtils::parseColumn(colJson));
     }
+}
+
+void SchemaManager::addColumn(
+    const std::string& columnName,
+    const bool allowsEmptyValues,
+    const std::vector<RuleDefinition>& rules
+) {
+    const auto it = std::ranges::find_if(schema.columns,
+                                         [&columnName](const ColumnDefinition& col) {
+                                             return col.name == columnName;
+                                         });
+    if (it != schema.columns.end()) {
+        throw std::runtime_error(Utils::formatMessage(DUPLICATED_COLUMN_ERROR, {columnName}));
+    }
+
+    ColumnDefinition col;
+    col.name = columnName;
+    col.allowsEmptyValues = allowsEmptyValues;
+    col.rules = rules;
+
+    schema.columns.push_back(std::move(col));
+}
+
+void SchemaManager::removeColumn(const std::string& columnName) {
+    const auto it = std::ranges::find_if(schema.columns,
+                                         [&columnName](const ColumnDefinition& col) {
+                                             return col.name == columnName;
+                                         });
+
+    if (it == schema.columns.end()) {
+        throw std::runtime_error(Utils::formatMessage(NONEXISTENT_COLUMN_ERROR, {columnName}));
+    }
+
+    schema.columns.erase(it);
 }

@@ -6,7 +6,7 @@
 #define VERIFICXX_ERRORMESSAGES_H
 #include <string>
 
-namespace ErrorMessages {
+namespace ValidationsErrorMessages {
     // {} are used as placeholders for dynamic strings
     inline std::string EMPTY_VALUE = "No data to validate";
     inline std::string STRING_OUT_OF_RANGE = "Value must have between {} and {} characters";

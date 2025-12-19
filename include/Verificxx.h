@@ -3,19 +3,21 @@
 #include <vector>
 #include <functional>
 #include "StringFixedRules.h"
+#include "SchemaManager.h"
 
 namespace validation {
 
     class Verificxx {
-    private:
         std::string value;
-        bool allowEmpty;
+        bool allowsEmptyValue;
         std::vector<std::function<ValidationResult()>> pendingRules;
         std::vector<ValidationResult> errors;
 
+        SchemaManager schemaManager;
+
     public:
-        explicit Verificxx(std::string value, bool allowEmpty = false)
-            : value(std::move(value)), allowEmpty(allowEmpty) {}
+        explicit Verificxx(std::string value, const bool allowsEmptyValue = false)
+            : value(std::move(value)), allowsEmptyValue(allowsEmptyValue) {}
 
         Verificxx& isValidEmailAddress() {
             pendingRules.emplace_back([this]() {
@@ -91,7 +93,7 @@ namespace validation {
             errors.clear();
 
             if (value.empty()) {
-                if (!allowEmpty) {
+                if (!allowsEmptyValue) {
                     errors.push_back({ false, std::monostate{} });
                     return false;
                 }
@@ -113,6 +115,62 @@ namespace validation {
 
         [[nodiscard]] const std::vector<ValidationResult>& getErrors() const {
             return errors;
+        }
+
+        Verificxx& fromColumnSchema(const std::string& columnName) {
+            const ColumnDefinition& column = schemaManager.getColumn(columnName);
+            allowsEmptyValue = column.allowsEmptyValues;
+
+            for (const auto& rule : column.rules) {
+                addRuleFromDefinition(rule);
+            }
+
+            return *this;
+        }
+
+        void loadSchema(std::ifstream& file) {
+            schemaManager.loadFromJson(file);
+        }
+
+        void addRuleFromDefinition(const RuleDefinition& rule) {
+            if (rule.name == "isValidEmailAddress") {
+                isValidEmailAddress();
+            }
+            else if (rule.name == "isAlphabetic") {
+                isAlphabetic();
+            }
+            else if (rule.name == "isNumeric") {
+                isNumeric();
+            }
+            else if (rule.name == "isAlphanumeric") {
+                isAlphanumeric();
+            }
+            else if (rule.name == "minLength") {
+                minLength(std::stoi(rule.params.at(0)));
+            }
+            else if (rule.name == "maxLength") {
+                maxLength(std::stoi(rule.params.at(0)));
+            }
+            else if (rule.name == "hasSubstrings") {
+                hasSubstrings(rule.params);
+            }
+            else if (rule.name == "isOneOf") {
+                isOneOf(rule.params);
+            }
+            else {
+                pendingRules.emplace_back(
+                    [ruleName = rule.name]() -> ValidationResult {
+                        return {
+                            false,
+                            std::vector<std::string>{ "Unknown rule: " + ruleName }
+                        };
+                    }
+                );
+            }
+        }
+
+        void addColumnToSchema(const std::string& columnName, const bool allowsEmptyValues,const std::vector<RuleDefinition>& rules) {
+            schemaManager.addColumn(columnName, allowsEmptyValues, rules);
         }
     };
 }
