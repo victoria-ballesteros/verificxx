@@ -1,5 +1,5 @@
 # VERIFICXX
-#### Video Demo: url
+#### Video Demo: https://youtu.be/j6604z1TdJc
 #### Description: 
 
 Verificxx is a multipurpose library designed for performing comprehensive validations on any kind of data represented as strings. Its primary goal is to provide a robust and flexible system that ensures data integrity, consistency, and conformity across different contexts, ranging from simple single-value checks to complex processes where multiple columns and validation rules must be applied automatically. The library supports two main approaches for validation. The first one is based on chaining predefined functions, each responsible for verifying a specific characteristic of the data, such as whether it is alphabetic, numeric, alphanumeric, complies with an email pattern, or respects length restrictions, uppercase or lowercase requirements, or specific substrings. This approach allows developers to build validation pipelines explicitly, combining rules as needed and receiving immediate feedback for each evaluation. The second approach relies on loading a JSON file that describes, in a structured way, the rules applicable to each column or data field. This method separates the definition of the validation schema from the execution logic, enabling the library to adapt to different datasets without recompiling the code. Users simply define the column names, the rules associated with each column, and optionally whether empty values are allowed. Once the schema is loaded, validation can be executed with a single call, providing detailed results for each column, including information on which rule failed and which value did not meet the specification.
@@ -28,6 +28,7 @@ cd verificxx
 mkdir build && cd build
 cmake ..
 cmake --build .
+sudo cmake --install .
 ```
 3. Optional, run tests:
 ```bash
